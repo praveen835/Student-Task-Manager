@@ -1,0 +1,25 @@
+# Python environments and caches
+.venv/
+venv/
+**/.venv/
+**/venv/
+__pycache__/
+*.py[cod]
+
+# Local configuration and databases
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite3
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+dist-ssr/
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
