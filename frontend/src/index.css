@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  color: #26372f;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  min-width: 320px;
+  background: #f5f6f2;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+button:focus-visible {
+  outline: 2px solid #d87956;
+  outline-offset: 2px;
+}
