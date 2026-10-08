@@ -37,9 +37,12 @@ app.add_middleware(
 #Home API
 @app.get("/")
 def home():
-    return{
-        "message":"Welcome to Student Task Manager"
-    }
+    return {"message": "Welcome to Student Task Manager"}
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
 
 #Get all tasks API
 @app.get("/tasks",response_model=list[TaskResponse])
