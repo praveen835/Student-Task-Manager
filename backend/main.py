@@ -49,9 +49,11 @@ def health_check():
 def get_tasks(
     status: str | None = Query(default=None, pattern="^(pending|completed)$"),
     search: str | None = Query(default=None, max_length=100),
+    limit: int = Query(default=100, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
-    return crud.get_task(db, status=status, search=search)
+    return crud.get_task(db, status=status, search=search, limit=limit, offset=offset)
 
 
 #Get task by ID API
