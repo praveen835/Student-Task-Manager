@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,8 +18,21 @@ models.Base.metadata.create_all(bind=engine)
 app=FastAPI(title="Student Task manager ")
 
 #CORS
-app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_credentials=True,
-                   allow_methods=["*"],allow_headers=["*"])
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    ).split(",")
+    if origin.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type"],
+)
 
 #Home API
 @app.get("/")
