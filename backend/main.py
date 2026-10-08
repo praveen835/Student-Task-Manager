@@ -56,6 +56,10 @@ def get_tasks(
     return crud.get_task(db, status=status, search=search, limit=limit, offset=offset)
 
 
+@app.get("/tasks/summary")
+def get_task_summary(db: Session = Depends(get_db)):
+    return crud.get_task_counts(db)
+
 #Get task by ID API
 @app.get("/tasks/{task_id}",response_model=TaskResponse)
 def get_task_by_id(task_id:int,db: Session = Depends(get_db)):

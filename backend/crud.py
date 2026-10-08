@@ -46,6 +46,11 @@ def get_task(
         .all()
     )
 
+def get_task_counts(db: Session):
+    total = db.query(Task).count()
+    completed = db.query(Task).filter(Task.completed.is_(True)).count()
+    return {"total": total, "completed": completed, "pending": total - completed}
+
 def get_task_by_id(db: Session, task_id: int):
     """
     Retrieve a task by its ID from the database.
