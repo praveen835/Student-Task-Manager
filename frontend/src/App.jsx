@@ -1,18 +1,8 @@
 import { useEffect, useState } from "react";
 import AddTask from "./components/AddTask";
 import TaskList from "./components/TaskList";
+import { createTask, listTasks, removeTask, updateTask as saveTask } from "./api";
 import "./App.css";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
-async function getResponseData(response) {
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
-    throw new Error(body?.detail || `Request failed (${response.status}).`);
-  }
-
-  return response.json();
-}
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -22,59 +12,42 @@ function App() {
 
   const getTasks = async () => {
     try {
-      const response = await fetch(`${API_URL}/tasks`);
-      const data = await getResponseData(response);
-      if (!Array.isArray(data)) {
-        throw new Error("The server returned an unexpected task list.");
-      }
+      const data = await listTasks();
+      if (!Array.isArray(data)) throw new Error("The server returned an unexpected task list.");
       setTasks(data);
       setError("");
       return true;
-    } catch (error) {
-      setError(error.message || "Could not load tasks. Check your connection and try again.");
+    } catch (loadError) {
+      setError(loadError.message || "Could not load tasks. Check your connection and try again.");
       return false;
     }
   };
 
   useEffect(() => {
     let isActive = true;
-
-    fetch(`${API_URL}/tasks`)
-      .then(getResponseData)
+    listTasks()
       .then((data) => {
-        if (!Array.isArray(data)) {
-          throw new Error("The server returned an unexpected task list.");
-        }
+        if (!Array.isArray(data)) throw new Error("The server returned an unexpected task list.");
         if (isActive) setTasks(data);
       })
       .catch((loadError) => {
-        if (isActive) {
-          setError(loadError.message || "Could not load tasks. Check your connection and try again.");
-        }
+        if (isActive) setError(loadError.message || "Could not load tasks. Check your connection and try again.");
       })
       .finally(() => {
         if (isActive) setIsLoading(false);
       });
-
-    return () => {
-      isActive = false;
-    };
+    return () => { isActive = false; };
   }, []);
 
   const addTask = async (task) => {
     setIsMutating(true);
     setError("");
     try {
-      const response = await fetch(`${API_URL}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(task),
-      });
-      await getResponseData(response);
+      await createTask(task);
       await getTasks();
       return true;
-    } catch (error) {
-      setError(error.message || "Could not add this task. Please try again.");
+    } catch (mutationError) {
+      setError(mutationError.message || "Could not add this task. Please try again.");
       return false;
     } finally {
       setIsMutating(false);
@@ -85,21 +58,10 @@ function App() {
     setIsMutating(true);
     setError("");
     try {
-      const response = await fetch(`${API_URL}/tasks/${task.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: task.title,
-          subject: task.subject,
-          due_date: task.due_date,
-          completed: !task.completed,
-        }),
-      });
-
-      await getResponseData(response);
+      await saveTask({ ...task, completed: !task.completed });
       await getTasks();
-    } catch (error) {
-      setError(error.message || "Could not update this task. Please try again.");
+    } catch (mutationError) {
+      setError(mutationError.message || "Could not update this task. Please try again.");
     } finally {
       setIsMutating(false);
     }
@@ -109,25 +71,17 @@ function App() {
     setIsMutating(true);
     setError("");
     try {
-      const response = await fetch(`${API_URL}/tasks/${id}`, {
-        method: "DELETE",
-      });
-      await getResponseData(response);
+      await removeTask(id);
       await getTasks();
-    } catch (error) {
-      setError(error.message || "Could not delete this task. Please try again.");
+    } catch (mutationError) {
+      setError(mutationError.message || "Could not delete this task. Please try again.");
     } finally {
       setIsMutating(false);
     }
   };
 
-  const completedTasks = tasks.filter(
-    (task) => task.completed
-  ).length;
-
-  const pendingTasks = tasks.filter(
-    (task) => !task.completed
-  ).length;
+  const completedTasks = tasks.filter((task) => task.completed).length;
+  const pendingTasks = tasks.length - completedTasks;
 
   return (
     <div className="app">
@@ -143,41 +97,14 @@ function App() {
             <span>Make room for<br />your next win.</span>
           </div>
         </header>
-
         <section className="dashboard" aria-label="Task summary">
-          <div className="stat-card stat-total">
-            <span className="stat-label">ALL TASKS</span>
-            <p>{tasks.length}</p>
-          </div>
-          <div className="stat-card stat-pending">
-            <span className="stat-label">TO DO</span>
-            <p>{pendingTasks}</p>
-          </div>
-          <div className="stat-card stat-completed">
-            <span className="stat-label">COMPLETED</span>
-            <p>{completedTasks}</p>
-          </div>
+          <div className="stat-card stat-total"><span className="stat-label">ALL TASKS</span><p>{tasks.length}</p></div>
+          <div className="stat-card stat-pending"><span className="stat-label">TO DO</span><p>{pendingTasks}</p></div>
+          <div className="stat-card stat-completed"><span className="stat-label">COMPLETED</span><p>{completedTasks}</p></div>
         </section>
-
         <AddTask addTask={addTask} isMutating={isMutating} />
-
-        {error && (
-          <div className="error-banner" role="alert">
-            <span>{error}</span>
-            <button type="button" onClick={getTasks} disabled={isLoading || isMutating}>
-              Reload tasks
-            </button>
-          </div>
-        )}
-
-        <TaskList
-          tasks={tasks}
-          isLoading={isLoading}
-          isMutating={isMutating}
-          updateTask={updateTask}
-          deleteTask={deleteTask}
-        />
-
+        {error && <div className="error-banner" role="alert"><span>{error}</span><button type="button" onClick={getTasks} disabled={isLoading || isMutating}>Reload tasks</button></div>}
+        <TaskList tasks={tasks} isLoading={isLoading} isMutating={isMutating} updateTask={updateTask} deleteTask={deleteTask} />
       </div>
     </div>
   );
