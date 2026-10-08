@@ -38,6 +38,7 @@ function TaskList({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
+          {query && <button className="clear-search" type="button" onClick={() => setQuery("")}>Clear</button>}
         </label>
       </div>
 

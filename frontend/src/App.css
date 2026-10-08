@@ -734,3 +734,23 @@ button:disabled {
   color: #a34f3e;
   font-weight: 700;
 }
+
+.search-field {
+  position: relative;
+}
+.clear-search {
+  position: absolute;
+  right: 7px;
+  padding: 3px 5px;
+  color: #52645a;
+  background: #e9ede8;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.clear-search:hover {
+  color: #21493b;
+  background: #dce7dd;
+}
