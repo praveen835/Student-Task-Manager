@@ -23,11 +23,11 @@ function TaskList({
   });
 
   return (
-    <div className="task-list">
+    <section className="task-list" aria-labelledby="task-list-title">
       <div className="list-heading">
         <div>
           <p className="eyebrow">YOUR WORKSPACE</p>
-          <h2>My tasks <span className="task-count">{tasks.length}</span></h2>
+          <h2 id="task-list-title">My tasks <span className="task-count">{tasks.length}</span></h2>
         </div>
         <label className="search-field">
           <span className="sr-only">Search tasks</span>
@@ -59,7 +59,7 @@ function TaskList({
       {isLoading ? (
         <p className="empty-message" role="status">Loading your tasks...</p>
       ) : visibleTasks.length === 0 ? (
-        <div className="empty-message">
+        <div className="empty-message" role="status" aria-live="polite">
           <p>{tasks.length === 0 ? "Nothing on your list yet." : query ? "No tasks match your search." : "No tasks in this view."}</p>
           {tasks.length === 0 && <span>Add a task above to get started.</span>}
         </div>
@@ -76,7 +76,7 @@ function TaskList({
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
