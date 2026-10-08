@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import TaskCard from "./TaskCard";
 
 function TaskList({
@@ -10,18 +10,17 @@ function TaskList({
 }) {
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
-  const filters = [
+  const filters = useMemo(() => [
     { id: "all", label: "All", count: tasks.length },
     { id: "pending", label: "To do", count: tasks.filter((task) => !task.completed).length },
     { id: "completed", label: "Completed", count: tasks.filter((task) => task.completed).length },
-  ];
-  const visibleTasks = tasks.filter((task) => {
+  ], [tasks]);
+  const visibleTasks = useMemo(() => tasks.filter((task) => {
     const matchesFilter = filter === "all"
       || (filter === "completed" ? task.completed : !task.completed);
     const searchText = `${task.title} ${task.subject}`.toLowerCase();
     return matchesFilter && searchText.includes(query.trim().toLowerCase());
-  });
-
+  }), [filter, query, tasks]);
   return (
     <section className="task-list" aria-labelledby="task-list-title">
       <div className="list-heading">

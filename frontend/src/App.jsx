@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddTask from "./components/AddTask";
 import TaskList from "./components/TaskList";
 import { createTask, listTasks, removeTask, updateTask as saveTask } from "./api";
@@ -80,8 +80,10 @@ function App() {
     }
   };
 
-  const completedTasks = tasks.filter((task) => task.completed).length;
-  const pendingTasks = tasks.length - completedTasks;
+  const taskCounts = useMemo(() => {
+    const completed = tasks.filter((task) => task.completed).length;
+    return { completed, pending: tasks.length - completed };
+  }, [tasks]);
 
   return (
     <div className="app">
@@ -99,8 +101,8 @@ function App() {
         </header>
         <section className="dashboard" aria-label="Task summary">
           <div className="stat-card stat-total"><span className="stat-label">ALL TASKS</span><p>{tasks.length}</p></div>
-          <div className="stat-card stat-pending"><span className="stat-label">TO DO</span><p>{pendingTasks}</p></div>
-          <div className="stat-card stat-completed"><span className="stat-label">COMPLETED</span><p>{completedTasks}</p></div>
+          <div className="stat-card stat-pending"><span className="stat-label">TO DO</span><p>{taskCounts.pending}</p></div>
+          <div className="stat-card stat-completed"><span className="stat-label">COMPLETED</span><p>{taskCounts.completed}</p></div>
         </section>
         <AddTask addTask={addTask} isMutating={isMutating} />
         {error && <div className="error-banner" role="alert"><span>{error}</span><button type="button" onClick={getTasks} disabled={isLoading || isMutating}>Reload tasks</button></div>}
