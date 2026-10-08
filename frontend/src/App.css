@@ -726,3 +726,11 @@ button:disabled {
   color: #9a5545;
   font-size: 0.8rem;
 }
+
+.task-card.overdue {
+  border-left: 3px solid #d86d4e;
+}
+.task-card.overdue .task-meta {
+  color: #a34f3e;
+  font-weight: 700;
+}

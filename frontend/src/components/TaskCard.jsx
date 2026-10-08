@@ -1,3 +1,5 @@
+import { formatDueDate, isOverdue } from "../dateUtils";
+
 function TaskCard({ task, disabled, updateTask, deleteTask }) {
   const handleDelete = () => {
     if (window.confirm(`Delete “${task.title}”? This cannot be undone.`)) {
@@ -5,15 +7,16 @@ function TaskCard({ task, disabled, updateTask, deleteTask }) {
     }
   };
 
+  const overdue = isOverdue(task);
   return (
-    <article className={task.completed ? "task-card completed" : "task-card"}>
+    <article className={`${task.completed ? "task-card completed" : "task-card"}${overdue ? " overdue" : ""}`}>
       <div className="task-details">
         <span className={task.completed ? "status-dot done" : "status-dot"} aria-hidden="true" />
         <div>
           <h3>{task.title}</h3>
           <p className="task-meta">
             <span>{task.subject}</span><span aria-hidden="true">/</span>
-            <time dateTime={task.due_date}>Due {new Date(`${task.due_date}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</time>
+            <time dateTime={task.due_date}>{overdue ? "Overdue" : "Due"} {formatDueDate(task.due_date)}</time>
           </p>
         </div>
       </div>
