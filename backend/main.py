@@ -1,23 +1,18 @@
 import os
 
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-
 from sqlalchemy.orm import Session
 
-import models
 import crud
+import models
+from database import engine, get_db
+from schemas import TaskCreate, TaskResponse, TaskUpdate
 
-from database import  engine, get_db
-from schemas import TaskCreate,TaskUpdate,TaskResponse
-
-#create database tables
 models.Base.metadata.create_all(bind=engine)
 
-#create fastapi Application
-app=FastAPI(title="Student Task manager ")
+app = FastAPI(title="Student Task Manager", version="1.0.0")
 
-#CORS
 allowed_origins = [
     origin.strip()
     for origin in os.getenv(
@@ -34,7 +29,7 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-#Home API
+
 @app.get("/")
 def home():
     return {"message": "Welcome to Student Task Manager"}
@@ -44,8 +39,8 @@ def home():
 def health_check():
     return {"status": "ok"}
 
-#Get all tasks API
-@app.get("/tasks",response_model=list[TaskResponse])
+
+@app.get("/tasks", response_model=list[TaskResponse])
 def get_tasks(
     status: str | None = Query(default=None, pattern="^(pending|completed)$"),
     search: str | None = Query(default=None, max_length=100),
@@ -60,32 +55,29 @@ def get_tasks(
 def get_task_summary(db: Session = Depends(get_db)):
     return crud.get_task_counts(db)
 
-#Get task by ID API
-@app.get("/tasks/{task_id}",response_model=TaskResponse)
-def get_task_by_id(task_id:int,db: Session = Depends(get_db)):
-    task=crud.get_task_by_id(db,task_id)
+
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
+def get_task_by_id(task_id: int, db: Session = Depends(get_db)):
+    task = crud.get_task_by_id(db, task_id)
     if task is None:
-        raise HTTPException(status_code=404,detail="Task not found")
+        raise HTTPException(status_code=404, detail="Task not found")
     return task
 
-#Create task API
-@app.post("/tasks",response_model=TaskResponse)
+
+@app.post("/tasks", response_model=TaskResponse, status_code=201)
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     return crud.create_task(db, task)
 
-#Update task API
-@app.put("/tasks/{task_id}",response_model=TaskResponse)
-def update_task(task_id:int,task:TaskUpdate,db: Session = Depends(get_db)):
-    db_task=crud.update_task(db,task_id,task)
+
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
+    db_task = crud.update_task(db, task_id, task)
     if db_task is None:
-        raise HTTPException(status_code=404,detail="Task not found")
+        raise HTTPException(status_code=404, detail="Task not found")
     return db_task
 
-#Delete task API
-@app.delete("/tasks/{task_id}")
-def delete_task(task_id:int,db: Session = Depends(get_db)):
-    db_task=crud.delete_task(db,task_id)
-    if db_task is None:
-        raise HTTPException(status_code=404,detail="Task not found")
-    return {"message":"Task deleted successfully"}
 
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    if crud.delete_task(db, task_id) is None:
+        raise HTTPException(status_code=404, detail="Task not found")
