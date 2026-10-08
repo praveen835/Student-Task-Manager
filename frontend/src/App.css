@@ -754,3 +754,30 @@ button:disabled {
   color: #21493b;
   background: #dce7dd;
 }
+
+@media (max-width: 700px) {
+  .container {
+    width: min(100% - 28px, 960px);
+    padding-top: 32px;
+  }
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .page-header h1 {
+    font-size: 2.15rem;
+  }
+  .list-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .search-field {
+    width: 100%;
+  }
+  .task-buttons {
+    width: 100%;
+  }
+  .complete-btn {
+    flex: 1;
+  }
+}
