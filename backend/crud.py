@@ -23,17 +23,17 @@ def create_task(db: Session, task: TaskCreate):
     db.commit()
     db.refresh(db_task)
     return db_task
-def get_task(db: Session,):
-    """
-    Retrieve all tasks from the database.
-
-    Args:
-        db (Session): The database session.
-
-    returns:
-        List[Task]: A list of all tasks in the database.
-    """
-    return db.query(Task).all()
+def get_task(db: Session, status: str | None = None, search: str | None = None):
+    """Return tasks with optional status and title/subject filters."""
+    query = db.query(Task)
+    if status == "completed":
+        query = query.filter(Task.completed.is_(True))
+    elif status == "pending":
+        query = query.filter(Task.completed.is_(False))
+    if search:
+        pattern = f"%{search.strip()}%"
+        query = query.filter((Task.title.ilike(pattern)) | (Task.subject.ilike(pattern)))
+    return query.order_by(Task.completed.asc(), Task.due_date.asc(), Task.id.asc()).all()
 
 def get_task_by_id(db: Session, task_id: int):
     """

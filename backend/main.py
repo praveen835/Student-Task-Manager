@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Depends,HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy.orm import Session
@@ -28,8 +28,13 @@ def home():
 
 #Get all tasks API
 @app.get("/tasks",response_model=list[TaskResponse])
-def get_tasks(db: Session = Depends(get_db)):
-    return crud.get_task(db)
+def get_tasks(
+    status: str | None = Query(default=None, pattern="^(pending|completed)$"),
+    search: str | None = Query(default=None, max_length=100),
+    db: Session = Depends(get_db),
+):
+    return crud.get_task(db, status=status, search=search)
+
 
 #Get task by ID API
 @app.get("/tasks/{task_id}",response_model=TaskResponse)
